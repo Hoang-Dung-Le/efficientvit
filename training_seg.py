@@ -747,7 +747,7 @@ def main():
 # Initialize your model, optimizer, and loss function
     model = create_seg_model(args.model, args.dataset, weight_url=args.weight_url)
     model = torch.nn.DataParallel(model).cuda()
-    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
+    optimizer = torch.optim.Adam(model.parameters(), lr=0.0001)
     criterion = torch.nn.CrossEntropyLoss()
 
     # Training loop
