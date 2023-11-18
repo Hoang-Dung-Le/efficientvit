@@ -742,48 +742,47 @@ def main():
         drop_last=False,
     )
 
+    # Assume you have a function create_seg_model similar to the evaluation code
+# Initialize your model, optimizer, and loss function
     model = create_seg_model(args.model, args.dataset, weight_url=args.weight_url)
     model = torch.nn.DataParallel(model).cuda()
-    model.eval()
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
+    criterion = torch.nn.CrossEntropyLoss()
 
-    if args.save_path is not None:
-        os.makedirs(args.save_path, exist_ok=True)
-    interaction = AverageMeter(is_distributed=False)
-    union = AverageMeter(is_distributed=False)
-    iou = SegIOU(len(dataset.classes))
-    with torch.inference_mode():
-        with tqdm(total=len(data_loader), desc=f"Eval {args.model} on {args.dataset}") as t:
-            for feed_dict in data_loader:
-                images, mask = feed_dict["data"].cuda(), feed_dict["label"].cuda()
-                # compute output
-                output = model(images)
-                # resize the output to match the shape of the mask
-                if output.shape[-2:] != mask.shape[-2:]:
-                    output = resize(output, size=mask.shape[-2:])
-                output = torch.argmax(output, dim=1)
-                stats = iou(output, mask)
-                interaction.update(stats["i"])
-                union.update(stats["u"])
+    # Training loop
+    num_epochs = args.num_epochs  # Define the number of epochs
+    for epoch in range(num_epochs):
+        model.train()  # Set the model to training mode
+        epoch_loss = 0.0
 
-                t.set_postfix(
-                    {
-                        "mIOU": (interaction.sum / union.sum).cpu().mean().item() * 100,
-                        "image_size": list(images.shape[-2:]),
-                    }
-                )
-                t.update()
+        for batch_idx, feed_dict in enumerate(data_loader):
+            images, mask = feed_dict["data"].cuda(), feed_dict["label"].cuda()
 
-                if args.save_path is not None:
-                    with open(os.path.join(args.save_path, "summary.txt"), "a") as fout:
-                        for i, (idx, image_path) in enumerate(zip(feed_dict["index"], feed_dict["image_path"])):
-                            pred = output[i].cpu().numpy()
-                            raw_image = np.array(Image.open(image_path).convert("RGB"))
-                            canvas = get_canvas(raw_image, pred, dataset.class_colors)
-                            canvas = Image.fromarray(canvas)
-                            canvas.save(os.path.join(args.save_path, f"{idx}.png"))
-                            fout.write(f"{idx}:\t{image_path}\n")
+            # Zero the parameter gradients
+            optimizer.zero_grad()
 
-    print(f"mIoU = {(interaction.sum / union.sum).cpu().mean().item() * 100:.3f}")
+            # Forward pass
+            output = model(images)
+            loss = criterion(output, mask)  # Calculate the loss
+
+            # Backward pass and optimize
+            loss.backward()
+            optimizer.step()
+
+            epoch_loss += loss.item()
+
+            # Print statistics every few batches
+            if batch_idx % args.print_freq == 0:
+                print(f"Epoch [{epoch+1}/{num_epochs}] "
+                    f"Batch [{batch_idx+1}/{len(data_loader)}] "
+                    f"Loss: {loss.item():.4f}")
+
+        epoch_loss /= len(train_data_loader)
+        print(f"Epoch [{epoch+1}/{num_epochs}] Average Loss: {epoch_loss:.4f}")
+
+    # Save the trained model
+    torch.save(model.state_dict(), 'segmentation_model.pth')
+
 
 
 if __name__ == "__main__":
