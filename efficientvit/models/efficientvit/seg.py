@@ -175,6 +175,20 @@ def efficientvit_seg_b1(dataset: str, **kwargs) -> EfficientViTSeg:
             n_classes=150,
             **build_kwargs_from_config(kwargs, SegHead),
         )
+    elif dataset == "foodseg":
+        head = SegHead(
+            fid_list=["stage4", "stage3", "stage2"],
+            in_channel_list=[256, 128, 64],
+            stride_list=[32, 16, 8],
+            head_stride=8,
+            head_width=64,
+            head_depth=3,
+            expand_ratio=4,
+            middle_op="mbconv",
+            final_expand=None,
+            n_classes=1,
+            **build_kwargs_from_config(kwargs, SegHead),
+        )
     else:
         raise NotImplementedError
     model = EfficientViTSeg(backbone, head)
