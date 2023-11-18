@@ -730,7 +730,7 @@ def main():
         dataset = CityscapesDataset(args.path, (args.crop_size, args.crop_size * 2))
     elif args.dataset == "ade20k":
         dataset = ADE20KDataset(args.path, crop_size=args.crop_size)
-    elif args.dataset == "foodset":
+    elif args.dataset == "foodseg":
         dataset = FoodSeg(args.path, crop_size=args.crop_size)
     else:
         raise NotImplementedError
