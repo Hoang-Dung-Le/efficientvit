@@ -42,7 +42,7 @@ REGISTERED_SEG_MODEL: dict[str, dict[str, str]] = {
 
 
 def create_seg_model(
-    name: str, dataset: str, pretrained=True, weight_url: str or None = None, **kwargs
+    name: str, dataset: str, pretrained=False, weight_url: str or None = None, **kwargs
 ) -> EfficientViTSeg:
     model_dict = {
         "b0": efficientvit_seg_b0,
