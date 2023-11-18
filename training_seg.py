@@ -751,7 +751,7 @@ def main():
     criterion = torch.nn.CrossEntropyLoss()
 
     # Training loop
-    num_epochs = args.num_epochs  # Define the number of epochs
+    num_epochs = 2  # Define the number of epochs
     for epoch in range(num_epochs):
         model.train()  # Set the model to training mode
         epoch_loss = 0.0
