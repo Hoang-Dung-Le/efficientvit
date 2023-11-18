@@ -35,6 +35,9 @@ REGISTERED_SEG_MODEL: dict[str, dict[str, str]] = {
         "l1": "assets/checkpoints/seg/ade20k/l1.pt",
         "l2": "assets/checkpoints/seg/ade20k/l2.pt",
     },
+    "foodseg" :{
+        "l2": "assets/l2.pt"
+    }
 }
 
 
