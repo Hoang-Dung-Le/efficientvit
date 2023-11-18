@@ -255,7 +255,7 @@ class FoodSeg(Dataset):
                 if suffix not in [".jpg"]:
                     continue
                 image_path = os.path.join(dirpath, fname)
-                mask_path = image_path.replace("/images/", "/annotations/")
+                mask_path = image_path.replace('/trainingimages/', "/traininglabels/")
                 if not mask_path.endswith(".png"):
                     mask_path = ".".join([*mask_path.split(".")[:-1], "png"])
                 samples.append((image_path, mask_path))
