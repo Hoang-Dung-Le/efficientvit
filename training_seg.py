@@ -777,7 +777,7 @@ def main():
                     f"Batch [{batch_idx+1}/{len(data_loader)}] "
                     f"Loss: {loss.item():.4f}")
 
-        epoch_loss /= len(train_data_loader)
+        epoch_loss /= len(data_loader)
         print(f"Epoch [{epoch+1}/{num_epochs}] Average Loss: {epoch_loss:.4f}")
 
     # Save the trained model
